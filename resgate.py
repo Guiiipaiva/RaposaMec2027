@@ -13,6 +13,21 @@ sensor_prata.lights.on(20)
 
 radio = BLERadio(broadcast_channel=61)
 
+motor_garra = Motor(Port.B, Direction.COUNTERCLOCKWISE)
+motor_cesto = Motor(Port.D, Direction.COUNTERCLOCKWISE)
+
+def subir_garra():
+    motor_garra.run_time(500, 600)
+
+def descer_garra():
+        motor_garra.run_time(-500, 600)
+
+def descarregar():
+    motor_cesto.run_time(600, 500)
+
+def voltar_cesto():
+    motor_cesto.run_time(-600, 500)
+
 def carregar_calibracao():
 
     dados = hub.system.storage(0, read=10)
