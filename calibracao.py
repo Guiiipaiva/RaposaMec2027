@@ -3,12 +3,10 @@ from pybricks.pupdevices import ColorSensor
 from pybricks.parameters import Port, Button
 from pybricks.tools import wait
 
-
 hub = PrimeHub()
 sensor = ColorSensor(Port.A)
 
 sensor.lights.on(20)
-
 
 def calibrar_prata():
 
@@ -48,8 +46,6 @@ def calibrar_prata():
 
         v_min = min(v_min, V)
         v_max = max(v_max, V)
-
-        # Reflexão
         
         wait(50)
         tempo += 50
@@ -68,15 +64,11 @@ def calibrar_prata():
     v_min, v_max,
 ) = calibrar_prata()
 
-
 print("H:", h_min, "-", h_max)
 print("S:", s_min, "-", s_max)
 print("V:", v_min, "-", v_max)
 
-
-# =====================================
 # SALVAR NO STORAGE
-# =====================================
 
 dados = bytes([
 
