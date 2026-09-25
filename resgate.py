@@ -17,13 +17,13 @@ motor_garra = Motor(Port.B, Direction.COUNTERCLOCKWISE)
 motor_cesto = Motor(Port.D, Direction.COUNTERCLOCKWISE)
 
 def subir_garra():
-    motor_garra.run_time(500, 600)
+    motor_garra.run_time(600, 1000)
 
 def descer_garra():
         motor_garra.run_time(-500, 600)
 
 def descarregar():
-    motor_cesto.run_time(600, 500)
+    motor_cesto.run_time(600, 800)
 
 def voltar_cesto():
     motor_cesto.run_time(-600, 500)
@@ -92,7 +92,6 @@ print("S:", s_min, "-", s_max)
 print("V:", v_min, "-", v_max)
 
 while True:
-
     manda_mensagem()
 
     wait(100)
