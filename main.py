@@ -204,16 +204,16 @@ def andar_ate_bater():
     motor_direito.run(400)
 
     wait(250) 
-    LIMITE_TORQUE = 160
+    LIMITE_TORQUE = 200
     
     while True:
         forca_esq = abs(motor_esquerdo.load())
         forca_dir = abs(motor_direito.load())
         
-        if forca_esq > LIMITE_TORQUE or forca_dir > LIMITE_TORQUE or ultrasonicoLado.distance() > 35 or sensor_direito.reflection() < 25 or sensor_esquerdo.reflection() < 25:
+        if forca_esq > LIMITE_TORQUE or forca_dir > LIMITE_TORQUE or ultrasonicoLado.distance() >= 350 or sensor_direito.reflection() < 25 or sensor_esquerdo.reflection() < 25:
             motor_direito.dc(0)
             motor_esquerdo.dc(0)
-            if ultrasonicoLado.distance() >= 35:
+            if ultrasonicoLado.distance() >= 350:
                 opcao =  "Lado"
 
             elif sensor_direito.reflection() < 25 or sensor_esquerdo.reflection() < 25:
@@ -249,9 +249,14 @@ def confere_prata():
         motor_esquerdo.dc(0)
         
         wait(1000)
+
+        area_resgate()
     
     else:
         pass
+
+def area_resgate():
+    robo.straight(40)
 
 while sensor_direito.color() != Color.RED or sensor_esquerdo.color() != Color.RED:
     
