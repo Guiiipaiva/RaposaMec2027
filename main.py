@@ -5,29 +5,31 @@ from pybricks.robotics import DriveBase
 from pybricks.tools import wait
 from pybricks.messaging import BLERadio
 
-# 1. Inicializa o Hub
+#Inicializa o Hub
 hub = PrimeHub()
 radio = BLERadio(observe_channels=[61])
-# 2. Configura os Motores da Esteira
+
+#Configura os Motores da Esteira
 motor_esquerdo = Motor(Port.A, Direction.COUNTERCLOCKWISE)
 motor_direito = Motor(Port.B, Direction.CLOCKWISE)
 
+#salva as inclinações do robo 
 anguloX, anguloY = hub.imu.tilt()
-# 3. Configura a DriveBase
-robo = DriveBase(motor_esquerdo, motor_direito, wheel_diameter=56, axle_track=112)
 
-# 4. Configura os Sensores nas suas portas
+#Configura a DriveBase
+robo = DriveBase(motor_esquerdo, motor_direito, wheel_diameter=45, axle_track=112)
+
+#Configura os Sensores nas suas portas
 sensor_esquerdo = ColorSensor(Port.C)
 sensor_direito = ColorSensor(Port.D)
 ultrasonicoFrente = UltrasonicSensor(Port.F)
 ultrasonicoLado = UltrasonicSensor(Port.E)
 
+#desliga as luzes do sensores ultrasonicos
 ultrasonicoFrente.lights.off()
 ultrasonicoLado.lights.off()
 
-sensor_direito.lights.off()
-sensor_esquerdo.lights.off() 
-
+#variaveis globais 
 KP = 7
 POTENCIA_BASE = 70
 KD = 0.8
@@ -53,7 +55,7 @@ def PID():
         POTENCIA_BASE = 100
 
     elif anguloX < -5:
-        POTENCIA_BASE = 40
+        POTENCIA_BASE = 30
 
     else:
         POTENCIA_BASE = 70
@@ -82,8 +84,7 @@ def Virar(angle):
             motor_direito.dc(80)
             motor_esquerdo.dc(-80)
 
-    motor_esquerdo.dc(0)
-    motor_direito.dc(0)
+    parar_motores()
 
 def virar_esq_atepreto(angle):
 
@@ -93,8 +94,7 @@ def virar_esq_atepreto(angle):
         motor_direito.dc(80)
         motor_esquerdo.dc(-80)
 
-    motor_esquerdo.dc(0)
-    motor_direito.dc(0)
+    parar_motores()
 
 def virar_dir_atepreto(angle):
     Virar(30)
@@ -105,35 +105,41 @@ def virar_dir_atepreto(angle):
         motor_direito.dc(-80)
         motor_esquerdo.dc(80)
 
+    parar_motores()
+
+def parar_motores():
     motor_esquerdo.dc(0)
     motor_direito.dc(0)
 
 def confere_verde():
-    if ((sensor_direito.color() == Color.GREEN) or (sensor_direito.color() == Color.CYAN)) or ((sensor_esquerdo.color() == Color.GREEN) or (sensor_esquerdo.color() == Color.CYAN)):
-        motor_esquerdo.dc(0)
-        motor_direito.dc(0)
+    cores_alvo = (Color.GREEN, Color.CYAN)
+    cor_dir = sensor_direito.color()
+    cor_esq = sensor_esquerdo.color()
+
+    if cor_dir in cores_alvo or cor_esq in cores_alvo:
+        parar_motores()
         wait(500)
         robo.straight(-10)
         
-        if ((sensor_direito.color() == Color.GREEN) or (sensor_direito.color() == Color.CYAN)) and ((sensor_esquerdo.color() == Color.GREEN) or (sensor_esquerdo.color() == Color.CYAN)):
-            motor_esquerdo.dc(0)
-            motor_direito.dc(0)
+        # Lê novamente após ir para trás
+        cor_dir = sensor_direito.color()
+        cor_esq = sensor_esquerdo.color()
+        
+        if cor_dir in cores_alvo and cor_esq in cores_alvo:
+            parar_motores()
             wait(1000)
-
             Virar(180)
             robo.straight(50)
 
-        elif (sensor_direito.color() == Color.GREEN) or (sensor_direito.color() == Color.CYAN):
-            motor_esquerdo.dc(0)
-            motor_direito.dc(0)
+        elif cor_dir in cores_alvo:
+            parar_motores()
             wait(1000) 
             robo.straight(90)
             virar_dir_atepreto(90)
             Virar(5)
 
-        elif (sensor_esquerdo.color() == Color.GREEN) or (sensor_esquerdo.color() == Color.CYAN):
-            motor_esquerdo.dc(0)
-            motor_direito.dc(0)
+        elif cor_esq in cores_alvo:
+            parar_motores()
             wait(1000) 
             robo.straight(90)
             virar_esq_atepreto(-90)
@@ -146,8 +152,7 @@ def rebolar_curva():
         wait(10)
         robo.straight(60)
         virar_esq_atepreto(-15)
-        motor_esquerdo.dc(0)
-        motor_direito.dc(0)
+        parar_motores()
         wait(10)
         if sensor_direito.reflection() < 30:
             Virar(10)
@@ -155,8 +160,7 @@ def rebolar_curva():
 
         else:
             virar_dir_atepreto(95)
-            motor_esquerdo.dc(0)
-            motor_direito.dc(0)
+            parar_motores()
 
             if sensor_direito.reflection() < 35:
                 robo.straight(-50)
@@ -168,8 +172,7 @@ def desvio():
     if ultrasonicoFrente.distance() < 50:
         ultrasonicoFrente.lights.on(100)
         ultrasonicoLado.lights.on(100)
-        motor_esquerdo.dc(0)
-        motor_direito.dc(0)
+        parar_motores()
         wait(500)
         robo.straight(-100)
         Virar(90)
@@ -211,8 +214,7 @@ def andar_ate_bater():
         forca_dir = abs(motor_direito.load())
         
         if forca_esq > LIMITE_TORQUE or forca_dir > LIMITE_TORQUE or ultrasonicoLado.distance() >= 350 or sensor_direito.reflection() < 25 or sensor_esquerdo.reflection() < 25:
-            motor_direito.dc(0)
-            motor_esquerdo.dc(0)
+            parar_motores()
             if ultrasonicoLado.distance() >= 350:
                 opcao =  "Lado"
 
@@ -238,15 +240,13 @@ def re_ate_bater():
             
         wait(10)
 
-    motor_esquerdo.stop()
-    motor_direito.stop()
+    parar_motores()
 
 def confere_prata():
     mensagem = radio.observe(61)
     
     if mensagem == "PRATA":
-        motor_direito.dc(0)
-        motor_esquerdo.dc(0)
+        parar_motores()
         
         wait(1000)
 
@@ -255,12 +255,32 @@ def confere_prata():
     else:
         pass
 
-def area_resgate():
-    robo.straight(40)
+def pid_andar_reto(dis):
+    rot_nec = dis / (3.14 * 45)
+    rot_ini = motor_direito.angle() / 360
+    rot_des = rot_ini + rot_nec
+    hub.imu.reset_heading(0)
+    while motor_direito.angle() / 360 <= rot_des:
+        a = 0 - hub.imu.heading() * 2 
+        robo.drive(POTENCIA_BASE * 2, a)
+    robo.stop()
 
-while sensor_direito.color() != Color.RED or sensor_esquerdo.color() != Color.RED:
+def area_resgate():
+    robo.straight(200)
+    if ultrasonicoLado.distance() < 200: 
+        pid_andar_reto(275)
+        parar_motores()
+        wait(5000)
+        Virar(90)
+        wait(500)
+        pid_andar_reto(200) 
     
-    PID()
-    rebolar_curva()
-    confere_verde()
-    confere_prata()
+    else: 
+        pid_andar_reto(275)
+        parar_motores()
+        wait(50)
+        Virar(-85)
+        wait(500)
+        pid_andar_reto(200) 
+
+area_resgate()
